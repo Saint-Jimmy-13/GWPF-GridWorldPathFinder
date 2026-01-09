@@ -1,0 +1,16 @@
+# Virtual Environment
+venv/
+env/
+
+# Python compiled files (automatically generated)
+__pycache__/
+*.pyc
+
+# Generated PDDL problem files (artifacts from experiments)
+problems/
+
+# Optional: Ignore data and plots for a clean 'code-only' repo
+# (Uncomment these to do not commit results)
+# experiment_results.csv
+# *.png
+
