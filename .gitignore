@@ -11,6 +11,5 @@ problems/
 
 # Optional: Ignore data and plots for a clean 'code-only' repo
 # (Uncomment these to do not commit results)
-# experiment_results.csv
-# *.png
-
+experiment_results.csv
+*.png
