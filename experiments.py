@@ -1,15 +1,12 @@
 import time
 import random
 import csv
-import tracemalloc
-import sys
-from pathlib import Path
-
+import tracemalloc  # For memory measurement
 from grid_problem import GridProblem, a_star_search
 from planning_utils import generate_pddl_problem, run_planning_solver
 from visualizer import draw_grid
 
-# Heuristics for A*
+# Heuristic for A* (Manhattan Distance)
 def manhattan_distance(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
