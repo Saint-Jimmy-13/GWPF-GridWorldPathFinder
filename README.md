@@ -1,10 +1,10 @@
 # AI Homework: Grid Pathfinding & Planning
 
 This repository contains the implementation of an AI experimental pipeline for the **Grid Pathfinding** problem. It compares two distinct AI techniques:
-1.  **A* Search** (Custom implementation with Manhattan distance heuristic).
+1.  **A\* Search** (Custom implementation with Manhattan distance heuristic).
 2.  **Automated Planning** (Modeled in PDDL and solved using the `unified-planning` library).
 
-[cite_start]This project was developed for the **Artificial Intelligence (2025-26)** course at Sapienza University of Rome[cite: 8].
+This project was developed for the **Artificial Intelligence (2025-26)** course at Sapienza University of Rome.
 
 ## 📂 Project Structure
 
