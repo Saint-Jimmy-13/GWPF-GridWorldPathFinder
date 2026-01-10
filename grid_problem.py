@@ -31,17 +31,11 @@ class GridProblem:
                     valid_moves.append((action_name, (nr, nc)))
         return valid_moves
     
-    def result(self, state, action):
-        """Return the new state after applying the action."""
-        # In our simple grid, the action tuple already contains the new coordinate
-        # Example action: ('UP', (0, 1)) -> returns (0, 1)
-        return action[1]
+    def step_cost(self, state, action, next_state):
+        return 1    # Uniform cost for grid movement
     
     def goal_test(self, state):
         return state == self.goal
-    
-    def step_cost(self, state, action, next_state):
-        return 1    # Uniform cost for grid movement
 
 class Node:
     def __init__(self, state, parent=None, action=None, g=0, h=0):
@@ -57,6 +51,11 @@ class Node:
         return self.f < other.f
 
 def a_star_search(problem, heuristic_func):
+    """
+    A* Implementation
+    Constraint: Duplicate elimination and NO reopening.
+    Returns: (path_list, expanded_nodes_count)
+    """
     # 1. Initialize
     start_node = Node(state=problem.start, g=0, h=heuristic_func(problem.start, problem.goal))
 
@@ -67,8 +66,8 @@ def a_star_search(problem, heuristic_func):
     # We need a way to check if a state is in the frontier and what its g-cost is
     # maps state -> node
     frontier_states = {start_node.state: start_node}
-
     explored = set()
+    nodes_expanded = 0
 
     while frontier:
         # 2. Pop
@@ -85,35 +84,36 @@ def a_star_search(problem, heuristic_func):
         
         # 3. Goal Test (immediately after pop)
         if problem.goal_test(current_node.state):
-            return reconstruct_path(current_node)
+            return reconstruct_path(current_node), nodes_expanded
         
         # 4. Add to explored
         explored.add(current_node.state)
+        nodes_expanded += 1
 
         # 5. Expand
         for action_name, next_state in problem.actions(current_node.state):
-            step_cost = problem.step_cost(current_node.state, action_name, next_state)
-            child_g = current_node.g + step_cost
+            # NO REOPENING: If in explored, ignore completely.
+            if next_state in explored:
+                continue
+
+            child_g = current_node.g + problem.step_cost(current_node.state, action_name, next_state)
             child_h = heuristic_func(next_state, problem.goal)
             child_node = Node(next_state, current_node, action_name, child_g, child_h)
 
-            # Logic from the slide:
-            # If child.State is not in explored and not in frontier
-            if next_state not in explored and next_state not in frontier_states:
+            # If not in frontier: Insert
+            if next_state not in frontier_states:
                 heapq.heappush(frontier, child_node)
                 frontier_states[next_state] = child_node
             
-            # Else if child is in frontier with higher g -> Replace
-            elif next_state in frontier_states:
-                existing_node = frontier_states[next_state]
-                if child_g < existing_node.g:
-                    # To "replace" in a heap, we simply push the better node
-                    # and update our tracker. The old node becomes "stale"
-                    # and will be skipped when popped.
-                    heapq.heappush(frontier, child_node)
-                    frontier_states[next_state] = child_node
-    
-    return None # Failure
+            # If in frontier with higher cost: Replace
+            elif child_g < frontier_states[next_state].g:
+                # To "replace" in a heap, we simply push the better node
+                # and update our tracker. The old node becomes "stale"
+                # and will be skipped when popped.
+                heapq.heappush(frontier, child_node)
+                frontier_states[next_state] = child_node
+
+    return None, nodes_expanded  # Failure
 
 def reconstruct_path(node):
     path = []
