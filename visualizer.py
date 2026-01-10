@@ -79,9 +79,9 @@ def parse_path(problem, path, algo):
     
     elif algo == 'Planner':
         # Planner returns PDDL: ['move(cell_0_0, cell_0_1)', ...]
-        # We extract the destination cell from each move sting
+        # We extract the destination cell from each move string
         for action_str in path:
-            # Regex to find the secon cell (destination)
+            # Regex to find the second cell (destination)
             # Looks for: any_text(cell_r_c, cell_dest_r_dest_c)
             match = re.search(r'cell_(\d+)_(\d+)\)$', action_str)
             if match:

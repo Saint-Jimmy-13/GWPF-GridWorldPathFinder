@@ -1,6 +1,6 @@
 ;; domain.pddl
 (define (domain grid-pathfinding)
-    (:requirements :strips ::typing)
+    (:requirements :strips :typing)
     (:types location)
 
     (:predicates

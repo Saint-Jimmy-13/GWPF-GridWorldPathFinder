@@ -32,7 +32,7 @@ def generate_pddl_problem(problem, output_filename="problem.pddl"):
     lines.append(f"    (at {get_cell_name(start_r, start_c)})")
 
     # 3. Connectivity (Graph edges)
-    # We iterate through all valid cells and check thei neighbors
+    # We iterate through all valid cells and check their neighbors
     for r in range(problem.size):
         for c in range(problem.size):
             if (r, c) in problem.obstacles:
@@ -41,7 +41,7 @@ def generate_pddl_problem(problem, output_filename="problem.pddl"):
             # Check all 4 directions
             for dr, dc in [(-1, 0), (1, 0), (0, -1), (0,1)]:
                 nr, nc = r + dr, c + dc
-                # If neighbor is whitin bounds and not wall
+                # If neighbor is within bounds and not wall
                 if 0 <= nr < problem.size and 0 <= nc < problem.size:
                     if (nr, nc) not in problem.obstacles:
                         lines.append(f"   (connected {get_cell_name(r, c)} {get_cell_name(nr, nc)})")
@@ -64,7 +64,7 @@ def generate_pddl_problem(problem, output_filename="problem.pddl"):
 def run_planning_solver(domain_file, problem_file):
     """
     Solves the PDDL problem using unified-planning.
-    Returns: A list of actions (the plan) ot None if failed.
+    Returns: A list of actions (the plan) or None if failed.
     """
     # 1. Parse the PDDL files
     reader = PDDLReader()

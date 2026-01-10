@@ -17,7 +17,7 @@ def run_experiments():
 
     results = []
 
-    print(f"{'Size':<6} | {'Algo':<10} | {'Time (s)':<10} | {'Nodes/Plan Len':<15} | {'Memory (MB)':<10}")
+    print(f"{'Size':<6} | {'Algo':<10} | {'Time (s)':<10} | {'Nodes/Plan Len':<15} | {'Memory (MB)':<10} | {'Avg BF':<10} | {'Max BF':<10}")
     print("-" * 65)
 
     for N in sizes:
@@ -44,7 +44,7 @@ def run_experiments():
             tracemalloc.start()
             start_time = time.time()
 
-            path_a_star, node_count = a_star_search(problem, manhattan_distance)
+            path_a_star, node_count, avg_bf, max_bf = a_star_search(problem, manhattan_distance)
 
             end_time = time.time()
             a_star_mem = tracemalloc.get_traced_memory()[1] / 10**6 # Convert to MB
@@ -62,10 +62,12 @@ def run_experiments():
                 'Algorithm': 'A*',
                 'Time': a_star_time,
                 'Metric_Value': node_count, # Nodes expanded
-                'Memory_MB': a_star_mem
+                'Memory_MB': a_star_mem,
+                'Avg_Branching': avg_bf,
+                'Max_Branching': max_bf
             })
 
-            print(f"{N:<6} | {'A*':<10} | {a_star_time:<10.4f} | {node_count:<15} | {a_star_mem:<10.4f}")
+            print(f"{N:<6} | {'A*':<10} | {a_star_time:<10.4f} | {node_count:<15} | {a_star_mem:<10.4f} | AvgBF: {avg_bf:10.2f} MaxBF: {max_bf:<10}")
 
             # --- 3. Run Planner ---
             # Generate PDDL files

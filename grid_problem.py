@@ -54,7 +54,7 @@ def a_star_search(problem, heuristic_func):
     """
     A* Implementation
     Constraint: Duplicate elimination and NO reopening.
-    Returns: (path_list, expanded_nodes_count)
+    Returns: (path, nodes_expanded, avg_branching_factor, max_branching_factor)
     """
     # 1. Initialize
     start_node = Node(state=problem.start, g=0, h=heuristic_func(problem.start, problem.goal))
@@ -67,7 +67,11 @@ def a_star_search(problem, heuristic_func):
     # maps state -> node
     frontier_states = {start_node.state: start_node}
     explored = set()
+    
+    # Stats Variables
     nodes_expanded = 0
+    total_branching = 0
+    max_branching = 0
 
     while frontier:
         # 2. Pop
@@ -84,17 +88,25 @@ def a_star_search(problem, heuristic_func):
         
         # 3. Goal Test (immediately after pop)
         if problem.goal_test(current_node.state):
-            return reconstruct_path(current_node), nodes_expanded
+            # Calculate Average Branching Factor
+            avg_bf = total_branching / nodes_expanded if nodes_expanded > 0 else 0
+            return reconstruct_path(current_node), nodes_expanded, avg_bf, max_branching
         
         # 4. Add to explored
         explored.add(current_node.state)
         nodes_expanded += 1
+
+        # Count successors for this specific node
+        current_successors = 0
 
         # 5. Expand
         for action_name, next_state in problem.actions(current_node.state):
             # NO REOPENING: If in explored, ignore completely.
             if next_state in explored:
                 continue
+
+            # This is a valid child generation
+            current_successors += 1
 
             child_g = current_node.g + problem.step_cost(current_node.state, action_name, next_state)
             child_h = heuristic_func(next_state, problem.goal)
@@ -112,8 +124,13 @@ def a_star_search(problem, heuristic_func):
                 # and will be skipped when popped.
                 heapq.heappush(frontier, child_node)
                 frontier_states[next_state] = child_node
+        
+        # Update Stats
+        total_branching += current_successors
+        if current_successors > max_branching:
+            max_branching = current_successors
 
-    return None, nodes_expanded  # Failure
+    return None, nodes_expanded, 0, 0   # Failure
 
 def reconstruct_path(node):
     path = []
