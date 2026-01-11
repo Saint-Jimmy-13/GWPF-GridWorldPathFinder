@@ -1,38 +1,44 @@
 # AI Homework: Grid Pathfinding & Planning
 
-This repository contains the implementation of an AI experimental pipeline for the **Grid Pathfinding** problem. It compares two distinct AI techniques:
-1.  **A\* Search** (Custom implementation with Manhattan distance heuristic).
-2.  **Automated Planning** (Modeled in PDDL and solved using the `unified-planning` library).
+This repository implements an AI pipeline for the **Grid Pathfinding** problem. It compares two techniques:
+1.  **A\* Search**: Custom implementation with Manhattan distance (Task 2.1).
+2.  **Automated Planning**: PDDL modeling solved via `pyperplan` (Task 2.2).
 
-This project was developed for the **Artificial Intelligence (2025-26)** course at Sapienza University of Rome.
+Developed for the **Artificial Intelligence (2025-26)** course at Sapienza University.
 
 ## 📂 Project Structure
 
-* `grid_problem.py`: Contains the `GridProblem` class (Task 1) and the custom `a_star_search` implementation (Task 2.1).
-* `planning_utils.py`: Functions to generate PDDL problem files and run the solver using `unified-planning` (Task 2.2).
-* `experiments.py`: Main script that runs the benchmark experiments on increasing grid sizes (Task 3).
-* `plot_results.py`: Generates graphs (Time, Memory, Nodes) from the experimental data.
-* `domain.pddl`: The PDDL domain definition for the Grid World.
-* `problems/`: Directory where generated PDDL problem files are stored.
+* `grid_problem.py`: Problem definition and A* implementation.
+* `planning_utils.py`: PDDL generation and solver integration.
+* `experiments.py`: Main script to run benchmarks and save data to `output/`.
+* `plot_results.py`: Generates graphs from the CSV results.
+* `domain.pddl`: Grid pathfinding PDDL domain.
+* `output/`: Generated during runtime (contains logs, CSVs, images, PDDL problems).
 
-## 🛠️ Dependencies
+## 🛠️ Installation
 
-The project is written in **Python 3**. The following external libraries are required:
+1.  **Create Environment:**
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # or venv\Scripts\activate on Windows
+    ```
 
-* **unified-planning**: For parsing and solving PDDL models.
-* **pandas**: For data manipulation.
-* **matplotlib**: For plotting experimental results.
+2.  **Install Dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-### Installation
-It is recommended to use a virtual environment.
+## 🚀 How to Run
 
-```bash
-# 1. Create and activate a virtual environment
-python -m venv venv
-# On Windows:
-venv\Scripts\activate
-# On Mac/Linux:
-source venv/bin/activate
+1.  **Run Experiments:**
+    This runs the benchmark loop (Grid sizes 5, 10, 15, 20), creates the `output/` directory, and saves results.
+    ```bash
+    python experiments.py
+    ```
 
-# 2. Install dependencies
-pip install unified-planning[pyperplan] pandas matplotlib
+2.  **Plot Results:**
+    After experiments finish, generate the plots:
+    ```bash
+    python plot_results.py
+    ```
+    Check the `output/` folder for `plot_time.png`, `plot_success_rate.png`, etc.

@@ -1,67 +1,63 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
-def plot_experiments(csv_file='experiment_results.csv'):
-    # 1. Load Data
-    try:
-        df = pd.read_csv(csv_file)
-    except FileNotFoundError:
-        print(f"Error: Could not find file '{csv_file}'. Run experiments.py first.")
+def plot_experiments(csv_file='output/experiment_results.csv', output_dir='output'):
+    if not os.path.exists(csv_file):
+        print(f"Error: {csv_file} not found. Run experiments.py first.")
         return
+
+    df = pd.read_csv(csv_file)
     
-    # 2. Aggregate Data (Take the mean of the multiple runs for each size)
-    # Grouped by 'Size' and 'Algorithm' to get the average Time, Memory, etc.
-    df_avg = df.groupby(['Size', 'Algorithm']).mean().reset_index()
+    # Filter only Successful runs for Time/Memory analysis
+    df_success = df[df['Success'] == True]
+    
+    # Group by Size and Algo
+    df_avg = df_success.groupby(['Size', 'Algorithm']).mean().reset_index()
+    
+    # 1. Success Rate Calculation (using original DF)
+    success_counts = df.groupby(['Size', 'Algorithm'])['Success'].mean().reset_index()
+    success_pivot = success_counts.pivot(index='Size', columns='Algorithm', values='Success')
 
-    # Pivot tables make it easier to plot lines for each algorithm
-    # Index = Size, Columns = Algorithm, Values = Metric
-    time_pivot = df_avg.pivot(index='Size', columns='Algorithm', values='Time')
-    mem_pivot = df_avg.pivot(index='Size', columns='Algorithm', values='Memory_MB')
-
-    # For "Nodes/Metric", we usually only care about A* Nodes Expanded for the report
-    # beacuse Planner "Plan Length" is not directly comparable to "Nodes Expanded".
-    nodes_df = df_avg[df_avg['Algorithm'] == 'A*']
-
-    # --- Plot 1: Running Time Comparison ---
+    # --- Plot 1: Success Rate ---
     plt.figure(figsize=(10, 6))
+    success_pivot.plot(kind='bar', ax=plt.gca())
+    plt.title('Success Rate by Grid Size')
+    plt.ylabel('Success Rate (0.0 - 1.0)')
+    plt.xlabel('Grid Size (N)')
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, 'plot_success_rate.png'))
+    print(f"Generated {os.path.join(output_dir, 'plot_success_rate.png')}")
+    plt.close()
+
+    # --- Plot 2: Time (Only Successful Runs) ---
+    plt.figure(figsize=(10, 6))
+    time_pivot = df_avg.pivot(index='Size', columns='Algorithm', values='Time')
     for algo in time_pivot.columns:
         plt.plot(time_pivot.index, time_pivot[algo], marker='o', label=algo)
-
-    plt.title('Execution Time: A* vs Planner', fontsize=14)
-    plt.xlabel('Grid Size (NxN)', fontsize=12)
-    plt.ylabel('Time (seconds)', fontsize=12)
-    plt.grid(True, linestyle='--', alpha=0.7)
-    plt.legend()
-    plt.savefig('plot_time.png')
-    print("Generated 'plot_time.png'")
-
-    # --- Plot 2: Memory Usage Comparison ---
-    plt.figure(figsize=(10, 6))
-    for algo in mem_pivot.columns:
-        plt.plot(mem_pivot.index, mem_pivot[algo], marker='s', linestyle='--', label=algo)
     
-    plt.title('Memory Usage: A* vs Planner', fontsize=14)
-    plt.xlabel('Grid Size (NxN)', fontsize=12)
-    plt.ylabel('Peak Memory (MB)', fontsize=12)
-    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.title('Avg Execution Time (Successful Runs Only)')
+    plt.ylabel('Time (s)')
+    plt.xlabel('Grid Size (N)')
     plt.legend()
-    plt.savefig('plot_memory.png')
-    print("Generated 'plot_memory.png'")
+    plt.grid(True, linestyle='--')
+    plt.savefig(os.path.join(output_dir, 'plot_time.png'))
+    print(f"Generated {os.path.join(output_dir, 'plot_time.png')}")
+    plt.close()
 
-    # --- Plot 3: A* Expanded Nodes (Scale Analysis) ---
+    # --- Plot 3: A* Nodes Expanded ---
+    nodes_df = df_avg[df_avg['Algorithm'] == 'A*']
     plt.figure(figsize=(10, 6))
     plt.plot(nodes_df['Size'], nodes_df['Metric_Value'], marker='^', color='green', label='A* Nodes')
-    
-    plt.title('Search Effort: A* Nodes Expanded', fontsize=14)
-    plt.xlabel('Grid Size (NxN)', fontsize=12)
-    plt.ylabel('Number of Nodes', fontsize=12)
-    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.title('Search Effort: A* Nodes Expanded')
+    plt.ylabel('Count')
+    plt.xlabel('Grid Size (N)')
     plt.legend()
-    plt.savefig('plot_astar_nodes.png')
-    print("Generated 'plot_astar_nodes.png'")
-
-    # Optional: Show plots if running locally
-    plt.show()
+    plt.grid(True, linestyle='--')
+    plt.savefig(os.path.join(output_dir, 'plot_astar_nodes.png'))
+    print(f"Generated {os.path.join(output_dir, 'plot_astar_nodes.png')}")
+    plt.close()
 
 if __name__ == "__main__":
     plot_experiments()

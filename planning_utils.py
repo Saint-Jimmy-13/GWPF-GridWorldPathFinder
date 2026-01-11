@@ -1,8 +1,9 @@
 from unified_planning.shortcuts import *
 from unified_planning.io import PDDLReader
 import os
+from typing import List, Optional
 
-def generate_pddl_problem(problem, output_filename="problem.pddl"):
+def generate_pddl_problem(problem, output_filename: str = "problem.pddl") -> str:
     """
     problem: An instance of GridProblem class
     output_filename: Where to save the PDDL string
@@ -39,7 +40,7 @@ def generate_pddl_problem(problem, output_filename="problem.pddl"):
                 continue
 
             # Check all 4 directions
-            for dr, dc in [(-1, 0), (1, 0), (0, -1), (0,1)]:
+            for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
                 nr, nc = r + dr, c + dc
                 # If neighbor is within bounds and not wall
                 if 0 <= nr < problem.size and 0 <= nc < problem.size:
@@ -61,7 +62,7 @@ def generate_pddl_problem(problem, output_filename="problem.pddl"):
         f.write("\n".join(lines))
     return output_filename
 
-def run_planning_solver(domain_file, problem_file):
+def run_planning_solver(domain_file: str, problem_file: str) -> Optional[List[str]]:
     """
     Solves the PDDL problem using unified-planning.
     Returns: A list of actions (the plan) or None if failed.

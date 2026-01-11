@@ -7,6 +7,4 @@ pandas>=1.3.0
 numpy>=1.21.0
 
 # Automated Planning Framework
-unified-planning>=0.6.0
-pyperplan>=1.2.0
-
+unified-planning[pyperplan]>=1.0.0

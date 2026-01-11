@@ -1,7 +1,12 @@
 import heapq
+from typing import List, Tuple, Set, Optional, Callable, Dict
+
+# Type aliases for clarity
+State = Tuple[int, int]
+Action = str
 
 class GridProblem:
-    def __init__(self, size, start, goal, obstacles):
+    def __init__(self, size: int, start: State, goal: State, obstacles: List[State]):
         """
         size: integer N for an N x N grid
         start: tuple (r, c)
@@ -11,9 +16,9 @@ class GridProblem:
         self.size = size
         self.start = start
         self.goal = goal
-        self.obstacles = set(obstacles) # Use a set for O(1) lookups
+        self.obstacles: Set[State] = set(obstacles) # Use a set for O(1) lookups
     
-    def actions(self, state):
+    def actions(self, state: State) -> List[Tuple[Action, State]]:
         """Returns valid moves from the current state (r, c)."""
         r, c = state
         candidates = [
@@ -31,14 +36,14 @@ class GridProblem:
                     valid_moves.append((action_name, (nr, nc)))
         return valid_moves
     
-    def step_cost(self, state, action, next_state):
+    def step_cost(self, state: State, action: Action, next_state: State) -> int:
         return 1    # Uniform cost for grid movement
     
-    def goal_test(self, state):
+    def goal_test(self, state: State) -> bool:
         return state == self.goal
 
 class Node:
-    def __init__(self, state, parent=None, action=None, g=0, h=0):
+    def __init__(self, state: State, parent: Optional['Node'] = None, action: Optional[Action] = None, g: int = 0, h: int = 0):
         self.state = state
         self.parent = parent
         self.action = action
@@ -46,27 +51,34 @@ class Node:
         self.h = h
         self.f = g + h
         
-    # This defines how the Priority Queue compares nodes (by f-score)
+    # Priority Queue comparison by f-score
     def __lt__(self, other):
         return self.f < other.f
+    
+def reconstruct_path(node: Node) -> List[Action]:
+    path = []
+    while node.parent is not None:
+        path.append(node.action)
+        node = node.parent
+    return path[::-1]   # Reverse to get Start -> Goal
 
-def a_star_search(problem, heuristic_func):
+def a_star_search(problem: GridProblem, heuristic_func: Callable[[State, State], int]):
     """
     A* Implementation
     Constraint: Duplicate elimination and NO reopening.
     Returns: (path, nodes_expanded, avg_branching_factor, max_branching_factor)
     """
     # 1. Initialize
-    start_node = Node(state=problem.start, g=0, h=heuristic_func(problem.start, problem.goal))
+    start_h = heuristic_func(problem.start, problem.goal)
+    start_node = Node(state=problem.start, g=0, h=start_h)
 
     # The frontier is a Priority Queue
     frontier = []
     heapq.heappush(frontier, start_node)
 
-    # We need a way to check if a state is in the frontier and what its g-cost is
-    # maps state -> node
-    frontier_states = {start_node.state: start_node}
-    explored = set()
+    # Frontier lookup map: state -> node
+    frontier_states: Dict[State, Node] = {start_node.state: start_node}
+    explored: Set[State] = set()
     
     # Stats Variables
     nodes_expanded = 0
@@ -77,18 +89,17 @@ def a_star_search(problem, heuristic_func):
         # 2. Pop
         current_node = heapq.heappop(frontier)
 
-        # In 'lazy' heap implementations, we might pop a node that was effectively "removed"
-        # (replaced by a better one). We check if this is the current best version.
+        # Lazy Deletion Check: If we found a better path to this state previously,
+        # the old "worse" node is still in the heap but removed from frontier_states.
         if current_node.state in frontier_states and frontier_states[current_node.state] != current_node:
-            continue    # Skip this "stale" node
+            continue    # Skip stale node
 
-        # Clean up frontier_states since it's leaving the frontier
+        # Remove from frontier set
         if current_node.state in frontier_states:
             del frontier_states[current_node.state]
         
         # 3. Goal Test (immediately after pop)
         if problem.goal_test(current_node.state):
-            # Calculate Average Branching Factor
             avg_bf = total_branching / nodes_expanded if nodes_expanded > 0 else 0
             return reconstruct_path(current_node), nodes_expanded, avg_bf, max_branching
         
@@ -112,16 +123,14 @@ def a_star_search(problem, heuristic_func):
             child_h = heuristic_func(next_state, problem.goal)
             child_node = Node(next_state, current_node, action_name, child_g, child_h)
 
-            # If not in frontier: Insert
+            # Case A: Not in frontier -> Insert
             if next_state not in frontier_states:
                 heapq.heappush(frontier, child_node)
                 frontier_states[next_state] = child_node
             
-            # If in frontier with higher cost: Replace
+            # Case B: In frontier with higher cost -> Replace
             elif child_g < frontier_states[next_state].g:
-                # To "replace" in a heap, we simply push the better node
-                # and update our tracker. The old node becomes "stale"
-                # and will be skipped when popped.
+                # We push the new better node. The old one becomes "stale".
                 heapq.heappush(frontier, child_node)
                 frontier_states[next_state] = child_node
         
@@ -131,10 +140,3 @@ def a_star_search(problem, heuristic_func):
             max_branching = current_successors
 
     return None, nodes_expanded, 0, 0   # Failure
-
-def reconstruct_path(node):
-    path = []
-    while node.parent is not None:
-        path.append(node.action)
-        node = node.parent
-    return path[::-1]   # Reverse to get Start -> Goal

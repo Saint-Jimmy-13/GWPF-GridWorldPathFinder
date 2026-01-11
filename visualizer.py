@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import re
+import os
 
 def draw_grid(problem, path=None, algorithm_name="Solution", output_file=None):
     """
@@ -52,8 +53,10 @@ def draw_grid(problem, path=None, algorithm_name="Solution", output_file=None):
     plt.title(f"{algorithm_name} Solution (Len: {len(path) if path else 0})")
 
     if output_file:
+        # Ensure dir exists
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
         plt.savefig(output_file)
-        print(f"Saved visualization to {output_file}")
+        print(f"  -> Saved visualization: {output_file}")
     else:
         plt.show()
     plt.close()
