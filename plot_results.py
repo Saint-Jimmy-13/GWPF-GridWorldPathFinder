@@ -46,6 +46,21 @@ def plot_experiments(csv_file='output/experiment_results.csv', output_dir='outpu
     plt.savefig(os.path.join(output_dir, 'plot_astar_nodes.png'))
     plt.close()
 
+    # --- Plot 3: Memory Usage Comparison ---
+    plt.figure(figsize=(10, 6))
+    pivot_mem = df_avg.pivot(index='Size', columns='Algorithm', values='Memory_MB')
+
+    for column in pivot_mem.columns:
+        plt.plot(pivot_mem.index, pivot_mem[column], marker='s', label=column)
+
+    plt.title('Memory Usage Comparison')
+    plt.ylabel('Peak Memory (MB)')
+    plt.xlabel('Grid Size (N)')
+    plt.legend()
+    plt.grid(True, ls="--", alpha=0.5)
+    plt.savefig(os.path.join(output_dir, 'plot_memory.png'))
+    plt.close()
+
     print("Plots generated in 'output/' folder.")
 
 if __name__ == "__main__":

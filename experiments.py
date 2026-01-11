@@ -63,7 +63,7 @@ def run_experiments():
             # We run this first. If it fails, we discard the map and retry.
             tracemalloc.start()
             t_start = time.time()
-            path_manhattan, nodes_manhattan, avg_bf, max_bf = a_star_search(problem, manhattan_distance)
+            path_manhattan, nodes_manhattan, avg_bf, max_bf, min_bf = a_star_search(problem, manhattan_distance)
             t_end = time.time()
             current, peak = tracemalloc.get_traced_memory()
             mem_manhattan = peak / 10**6
@@ -83,7 +83,9 @@ def run_experiments():
                 'Size': N, 'Run': run_id, 'Algorithm': 'A* (Manhattan)',
                 'Success': True, 'Time': t_end - t_start, 
                 'Metric_Value': nodes_manhattan, 'Memory_MB': mem_manhattan,
-                'Avg_Branching': avg_bf
+                'Avg_Branching': avg_bf,
+                'Max_Branching': max_bf,
+                'Min_Branching': min_bf
             })
 
             # Visualize first run
@@ -93,7 +95,7 @@ def run_experiments():
             # B. Run A* Euclidean
             tracemalloc.start()
             t_start = time.time()
-            path_euc, nodes_euc, avg_bf_euc, max_bf_euc = a_star_search(problem, euclidean_distance)
+            path_euc, nodes_euc, avg_bf_euc, max_bf_euc, min_bf_euc = a_star_search(problem, euclidean_distance)
             t_end = time.time()
             current, peak = tracemalloc.get_traced_memory()
             mem_euc = peak / 10**6
@@ -104,7 +106,9 @@ def run_experiments():
                 'Size': N, 'Run': run_id, 'Algorithm': 'A* (Euclidean)',
                 'Success': True, 'Time': t_end - t_start, 
                 'Metric_Value': nodes_euc, 'Memory_MB': mem_euc,
-                'Avg_Branching': avg_bf_euc
+                'Avg_Branching': avg_bf_euc,
+                'Max_Branching': max_bf_euc,
+                'Min_Branching': min_bf_euc
             })
 
             # C. Run Planners
@@ -140,7 +144,9 @@ def run_experiments():
                     'Size': N, 'Run': run_id, 'Algorithm': full_algo_name,
                     'Success': success_p, 'Time': elapsed,
                     'Metric_Value': plan_len, 'Memory_MB': mem_mb,
-                    'Avg_Branching': 0
+                    'Avg_Branching': 0,
+                    'Max_Branching': 0,
+                    'Min_Branching': 0
                 })
 
                 if run_id == 0 and success_p and planner_name == 'pyperplan':

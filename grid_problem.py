@@ -84,6 +84,7 @@ def a_star_search(problem: GridProblem, heuristic_func: Callable[[State, State],
     nodes_expanded = 0
     total_branching = 0
     max_branching = 0
+    min_branching = float('inf')
 
     while frontier:
         # 2. Pop
@@ -101,7 +102,9 @@ def a_star_search(problem: GridProblem, heuristic_func: Callable[[State, State],
         # 3. Goal Test (immediately after pop)
         if problem.goal_test(current_node.state):
             avg_bf = total_branching / nodes_expanded if nodes_expanded > 0 else 0
-            return reconstruct_path(current_node), nodes_expanded, avg_bf, max_branching
+            # If we never expanded any nodes (start==goal), min_bf is 0
+            final_min = min_branching if min_branching != float('inf') else 0
+            return reconstruct_path(current_node), nodes_expanded, avg_bf, max_branching, final_min
         
         # 4. Add to explored
         explored.add(current_node.state)
@@ -134,9 +137,11 @@ def a_star_search(problem: GridProblem, heuristic_func: Callable[[State, State],
                 heapq.heappush(frontier, child_node)
                 frontier_states[next_state] = child_node
         
-        # Update Stats
+        # Update Branching Stats
         total_branching += current_successors
         if current_successors > max_branching:
             max_branching = current_successors
+        if current_successors < min_branching:
+            min_branching = current_successors
 
-    return None, nodes_expanded, 0, 0   # Failure
+    return None, nodes_expanded, 0, 0, 0    # Failure
