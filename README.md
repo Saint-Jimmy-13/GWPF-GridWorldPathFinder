@@ -20,6 +20,7 @@ Developed for the **Artificial Intelligence (2025-26)** course at Sapienza Unive
 * `experiments.py`: Main script to run benchmarks (loops through all algorithms).
 * `plot_results.py`: Generates graphs from the CSV results.
 * `domain.pddl`: Grid pathfinding PDDL domain.
+* `visualizer.py`: Visualizes the grid, obstacles, and the path found in png images.
 * `output/`: Generated during runtime (contains logs, CSVs, images, PDDL problems).
 
 ## 🛠️ Installation
