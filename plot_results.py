@@ -37,7 +37,7 @@ def plot_experiments(csv_file='output/experiment_results.csv', output_dir='outpu
 
     # --- Plot 2: A* Nodes Expanded vs Generated ---
     # We only look at A* for node metrics
-    astar_df = df_avg[df_avg['Algorithm'].str.contains("A*")]
+    astar_df = df_avg[df_avg['Algorithm'].str.contains("A*", regex=False)]
     
     # Expanded
     pivot_expanded = astar_df.pivot(index='Size', columns='Algorithm', values='Metric_Value')
