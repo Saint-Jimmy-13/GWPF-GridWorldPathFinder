@@ -66,7 +66,7 @@ def a_star_search(problem: GridProblem, heuristic_func: Callable[[State, State],
     """
     A* Implementation
     Constraint: Duplicate elimination and NO reopening.
-    Returns: (path, nodes_expanded, avg_branching_factor, max_branching_factor)
+    Returns: (path, nodes_expanded, nodes_generated, max_mem_nodes, avg_branching_factor, max_branching_factor, min_branching_factor)
     """
     # 1. Initialize
     start_h = heuristic_func(problem.start, problem.goal)
@@ -82,11 +82,18 @@ def a_star_search(problem: GridProblem, heuristic_func: Callable[[State, State],
     
     # Stats Variables
     nodes_expanded = 0
+    nodes_generated = 1
+    max_mem_nodes = 0
     total_branching = 0
     max_branching = 0
     min_branching = float('inf')
 
     while frontier:
+        # Measure Memory: Current nodes in Heap + nodes in Explored set
+        current_mem = len(frontier) + len(explored)
+        if current_mem > max_mem_nodes:
+            max_mem_nodes = current_mem
+        
         # 2. Pop
         current_node = heapq.heappop(frontier)
 
@@ -104,7 +111,7 @@ def a_star_search(problem: GridProblem, heuristic_func: Callable[[State, State],
             avg_bf = total_branching / nodes_expanded if nodes_expanded > 0 else 0
             # If we never expanded any nodes (start==goal), min_bf is 0
             final_min = min_branching if min_branching != float('inf') else 0
-            return reconstruct_path(current_node), nodes_expanded, avg_bf, max_branching, final_min
+            return reconstruct_path(current_node), nodes_expanded, nodes_generated, max_mem_nodes, avg_bf, max_branching, final_min
         
         # 4. Add to explored
         explored.add(current_node.state)
@@ -121,6 +128,7 @@ def a_star_search(problem: GridProblem, heuristic_func: Callable[[State, State],
 
             # This is a valid child generation
             current_successors += 1
+            nodes_generated += 1
 
             child_g = current_node.g + problem.step_cost(current_node.state, action_name, next_state)
             child_h = heuristic_func(next_state, problem.goal)
@@ -144,4 +152,4 @@ def a_star_search(problem: GridProblem, heuristic_func: Callable[[State, State],
         if current_successors < min_branching:
             min_branching = current_successors
 
-    return None, nodes_expanded, 0, 0, 0    # Failure
+    return None, nodes_expanded, nodes_generated, max_mem_nodes, 0, 0, 0    # Failure

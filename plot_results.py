@@ -11,57 +11,56 @@ def plot_experiments(csv_file='output/experiment_results.csv', output_dir='outpu
     
     # Filter Successful runs for performance metrics
     df_success = df[df['Success'] == True]
-    df_avg = df_success.groupby(['Size', 'Algorithm']).mean().reset_index()
+    df_avg = df_success.groupby(['Size', 'Algorithm']).mean(numeric_only=True).reset_index()
+
+    # Generic helper to save plots
+    def save_plot(pivot_data, title, ylabel, filename, log_scale=False):
+        plt.figure(figsize=(10, 6))
+        for column in pivot_data.columns:
+            plt.plot(pivot_data.index, pivot_data[column], marker='o', label=column)
+        
+        if log_scale:
+            plt.yscale('log')
+            ylabel += " (Log Scale)"
+            
+        plt.title(title)
+        plt.ylabel(ylabel)
+        plt.xlabel('Grid Size (N)')
+        plt.legend()
+        plt.grid(True, which="both", ls="--", alpha=0.5)
+        plt.savefig(os.path.join(output_dir, filename))
+        plt.close()
 
     # --- Plot 1: Execution Time (Log Scale) ---
-    plt.figure(figsize=(10, 6))
     pivot_time = df_avg.pivot(index='Size', columns='Algorithm', values='Time')
-    
-    for column in pivot_time.columns:
-        plt.plot(pivot_time.index, pivot_time[column], marker='o', label=column)
-        
-    plt.yscale('log')   # Log scale is crucial here!
-    plt.title('Execution Time (Log Scale)')
-    plt.ylabel('Time (seconds) - Log Scale')
-    plt.xlabel('Grid Size (N)')
-    plt.legend()
-    plt.grid(True, which="both", ls="--", alpha=0.5)
-    plt.savefig(os.path.join(output_dir, 'plot_time.png'))
-    plt.close()
+    save_plot(pivot_time, 'Execution Time', 'Time (s)', 'plot_time.png', log_scale=True)
 
-    # --- Plot 2: A* Search Effort (Nodes Expanded) ---
-    # Filter only A* algorithms
+    # --- Plot 2: A* Nodes Expanded vs Generated ---
+    # We only look at A* for node metrics
     astar_df = df_avg[df_avg['Algorithm'].str.contains("A*")]
-    pivot_nodes = astar_df.pivot(index='Size', columns='Algorithm', values='Metric_Value')
+    
+    # Expanded
+    pivot_expanded = astar_df.pivot(index='Size', columns='Algorithm', values='Metric_Value')
+    save_plot(pivot_expanded, 'A* Search Effort: Nodes Expanded', 'Nodes Expanded', 'plot_astar_expanded.png')
 
-    plt.figure(figsize=(10, 6))
-    for column in pivot_nodes.columns:
-        plt.plot(pivot_nodes.index, pivot_nodes[column], marker='^', label=column)
-        
-    plt.title('Heuristic Comparison: Nodes Expanded')
-    plt.ylabel('Nodes Expanded')
-    plt.xlabel('Grid Size (N)')
-    plt.legend()
-    plt.grid(True, ls="--")
-    plt.savefig(os.path.join(output_dir, 'plot_astar_nodes.png'))
-    plt.close()
+    # Generated
+    pivot_generated = astar_df.pivot(index='Size', columns='Algorithm', values='Nodes_Generated')
+    save_plot(pivot_generated, 'A* Search Effort: Nodes Generated', 'Nodes Generated', 'plot_astar_generated.png')
 
-    # --- Plot 3: Memory Usage Comparison ---
-    plt.figure(figsize=(10, 6))
-    pivot_mem = df_avg.pivot(index='Size', columns='Algorithm', values='Memory_MB')
+    # --- Plot 3: Memory Usage (Abstract Nodes) ---
+    # "Maximum number of nodes kept in memory"
+    pivot_mem_nodes = astar_df.pivot(index='Size', columns='Algorithm', values='Max_Mem_Nodes')
+    save_plot(pivot_mem_nodes, 'Max Nodes in Memory (Frontier + Explored)', 'Node Count', 'plot_memory_nodes.png')
 
-    for column in pivot_mem.columns:
-        plt.plot(pivot_mem.index, pivot_mem[column], marker='s', label=column)
+    # --- Plot 4: Physical Memory (MB) ---
+    pivot_mem_mb = df_avg.pivot(index='Size', columns='Algorithm', values='Memory_MB')
+    save_plot(pivot_mem_mb, 'Physical Memory Usage', 'Peak Memory (MB)', 'plot_memory_mb.png')
 
-    plt.title('Memory Usage Comparison')
-    plt.ylabel('Peak Memory (MB)')
-    plt.xlabel('Grid Size (N)')
-    plt.legend()
-    plt.grid(True, ls="--", alpha=0.5)
-    plt.savefig(os.path.join(output_dir, 'plot_memory.png'))
-    plt.close()
+    # --- Plot 5: Branching Factor ---
+    pivot_bf = astar_df.pivot(index='Size', columns='Algorithm', values='Avg_Branching')
+    save_plot(pivot_bf, 'Average Effective Branching Factor', 'Branching Factor', 'plot_branching.png')
 
-    print("Plots generated in 'output/' folder.")
+    print(f"Plots generated in '{output_dir}/' folder.")
 
 if __name__ == "__main__":
     plot_experiments()

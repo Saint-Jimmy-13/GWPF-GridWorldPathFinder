@@ -8,4 +8,3 @@ numpy>=1.21.0
 
 # Automated Planning Framework
 unified-planning[pyperplan,fast-downward]>=1.0.0
-

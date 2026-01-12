@@ -63,7 +63,7 @@ def run_experiments():
             # We run this first. If it fails, we discard the map and retry.
             tracemalloc.start()
             t_start = time.time()
-            path_manhattan, nodes_manhattan, avg_bf, max_bf, min_bf = a_star_search(problem, manhattan_distance)
+            path_manhattan, nodes_manhattan, gen, max_mem_nodes, avg_bf, max_bf, min_bf = a_star_search(problem, manhattan_distance)
             t_end = time.time()
             current, peak = tracemalloc.get_traced_memory()
             mem_manhattan = peak / 10**6
@@ -82,7 +82,10 @@ def run_experiments():
             results.append({
                 'Size': N, 'Run': run_id, 'Algorithm': 'A* (Manhattan)',
                 'Success': True, 'Time': t_end - t_start, 
-                'Metric_Value': nodes_manhattan, 'Memory_MB': mem_manhattan,
+                'Metric_Value': nodes_manhattan,
+                'Nodes_Generated': gen,
+                'Max_Mem_Nodes': max_mem_nodes,
+                'Memory_MB': mem_manhattan,
                 'Avg_Branching': avg_bf,
                 'Max_Branching': max_bf,
                 'Min_Branching': min_bf
@@ -95,7 +98,7 @@ def run_experiments():
             # B. Run A* Euclidean
             tracemalloc.start()
             t_start = time.time()
-            path_euc, nodes_euc, avg_bf_euc, max_bf_euc, min_bf_euc = a_star_search(problem, euclidean_distance)
+            path_euc, nodes_euc, gen_euc, max_mem_nodes_euc, avg_bf_euc, max_bf_euc, min_bf_euc = a_star_search(problem, euclidean_distance)
             t_end = time.time()
             current, peak = tracemalloc.get_traced_memory()
             mem_euc = peak / 10**6
@@ -105,7 +108,10 @@ def run_experiments():
             results.append({
                 'Size': N, 'Run': run_id, 'Algorithm': 'A* (Euclidean)',
                 'Success': True, 'Time': t_end - t_start, 
-                'Metric_Value': nodes_euc, 'Memory_MB': mem_euc,
+                'Metric_Value': nodes_euc,
+                'Nodes_Generated': gen_euc,
+                'Max_Mem_Nodes': max_mem_nodes_euc,
+                'Memory_MB': mem_euc,
                 'Avg_Branching': avg_bf_euc,
                 'Max_Branching': max_bf_euc,
                 'Min_Branching': min_bf_euc
@@ -143,7 +149,10 @@ def run_experiments():
                 results.append({
                     'Size': N, 'Run': run_id, 'Algorithm': full_algo_name,
                     'Success': success_p, 'Time': elapsed,
-                    'Metric_Value': plan_len, 'Memory_MB': mem_mb,
+                    'Metric_Value': plan_len,
+                    'Nodes_Generated': 0,
+                    'Max_Mem_Nodes': 0,
+                    'Memory_MB': mem_mb,
                     'Avg_Branching': 0,
                     'Max_Branching': 0,
                     'Min_Branching': 0
