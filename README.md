@@ -4,7 +4,7 @@ This repository implements an AI pipeline for the **Grid Pathfinding** problem. 
 
 **Project Scope:**
 1.  **Task 1 (Problem):** A Grid World environment with random obstacles.
-2.  **Task 2.1 (A* Search):** Custom implementation supporting:
+2.  **Task 2.1 (A\* Search):** Custom implementation supporting:
     * *Manhattan Distance* (Admissible, consistent).
     * *Euclidean Distance* (Admissible, consistent, but less informed).
 3.  **Task 2.2 (Automated Planning):** PDDL modeling solved via:
