@@ -53,6 +53,15 @@ The **Fast Downward** planner is a C++ engine. It installs easily on **Linux, ma
     python plot_results.py
     ```
     Check the `output/` folder for:
-    * `plot_time.png` (Performance comparison)
-    * `plot_success_rate.png` (Robustness)
-    * `plot_astar_nodes.png` (Search effort comparison)
+    ###### Performance Metrics
+    * **`experiment_results.csv`**: Complete raw dataset of all runs.
+    * **`plot_time.png`**: Execution Time vs Grid Size (Log Scale). Shows A* vs Planners.
+    * **`plot_astar_expanded.png`**: Number of nodes expanded by A* (Manhattan vs Euclidean).
+    * **`plot_astar_generated.png`**: Total number of nodes generated (children created) by A*.
+    * **`plot_memory_nodes.png`**: Max abstract nodes kept in memory (Frontier + Explored).
+    * **`plot_memory_mb.png`**: Peak physical memory usage in MB.
+    * **`plot_branching.png`**: Average effective branching factor for A*.
+
+    ###### Visualizations
+    * **`vis_astar_<N>.png`**: A* solution path for grid size $N$ (e.g., `vis_astar_25.png`).
+    * **`vis_plan_<N>.png`**: Planner (PDDL) solution path for grid size $N$ (e.g., `vis_plan_25.png`).
